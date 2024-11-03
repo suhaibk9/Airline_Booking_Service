@@ -1,0 +1,4 @@
+/src/config/config.json
+.DS_Store
+.env
+/node_modules
