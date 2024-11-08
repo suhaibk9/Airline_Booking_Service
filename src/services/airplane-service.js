@@ -44,7 +44,25 @@ async function getAirplanes() {
     );
   }
 }
+async function getAirplane(id) {
+  try {
+    const resp = await airplaneRepository.get(id);
+    return resp;
+  } catch (error) {
+    Logger.error(error);
+    console.log('Explaining error', error.explanation);
+    console.log('ERROR MESSAGE', error.message);
+    if (error.statusCode === StatusCodes.NOT_FOUND) {
+      throw new AppError(error.message, StatusCodes.NOT_FOUND);
+    }
+    throw new AppError(
+      'Error getting airplane',
+      StatusCodes.INTERNAL_SERVER_ERROR
+    );
+  }
+}
 module.exports = {
   createAirplane,
   getAirplanes,
+  getAirplane,
 };

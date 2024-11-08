@@ -7,4 +7,5 @@ router.post(
   AirplaneController.createAirplane
 );
 router.get('/', AirplaneController.getAllAirplanes);
+router.get('/:id', AirplaneController.getAirplaneById);
 module.exports = router;

@@ -34,9 +34,23 @@ const getAllAirplanes = async (req, res) => {
     return res.status(error.statusCode).json(ErrorResponse);
   }
 };
+const getAirplaneById = async (req, res) => {
+  try {
+    const response = await AirplaneService.getAirplane(req.params.id);
+    SuccessResponse.data = response;
+    SuccessResponse.message = 'Airplane fetched successfully';
+    return res.status(StatusCodes.OK).json(SuccessResponse);
+  } catch (error) {
+    logger.error(error);
+    ErrorResponse.error = error;
+    ErrorResponse.message = error.message;
+    return res.status(error.statusCode).json(ErrorResponse);
+  }
+};
 module.exports = {
   createAirplane,
   getAllAirplanes,
+  getAirplaneById,
 };
 
 // Passport

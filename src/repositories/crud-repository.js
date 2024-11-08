@@ -1,61 +1,58 @@
-const { Logger } = require('../config/logger-config');
-
+const { StatusCodes } = require('http-status-codes');
+const { Logger } = require('../config/index');
+const AppError = require('../error/app-error');
 class CrudRepository {
   constructor(model) {
     this.model = model;
   }
-  //Insert INTO table (column1, column2, column3) VALUES (data.column1, data.column2, data.column3)
+
   async create(data) {
-    const response = await this.model.create(data);
-    return response;
+    const newEntry = await this.model.create(data);
+
+    return newEntry;
   }
-  //DELETE FROM table WHERE id = data
+
   async destroy(data) {
-    try {
-      const response = await this.model.destroy({
-        where: {
-          id: data,
-        },
-      });
-      return response;
-    } catch (error) {
-      Logger.error(error);
-      throw error;
+    const airplane = await this.model.destroy({
+      where: {
+        id: data,
+      },
+    });
+    if (!airplane) {
+      throw new AppError('Airplane not found', StatusCodes.NOT_FOUND);
     }
+    return airplane;
   }
-  //Select * from table where id = data
-  async get(data) {
-    try {
-      const response = await this.model.findByPk(data);
-      return response;
-    } catch (error) {
-      Logger.error(error);
-      throw error;
+
+  async get(primaryKey) {
+    const airplane = await this.model.findByPk(primaryKey);
+    if (!airplane) {
+      throw new AppError(
+        `Airplane with id ${primaryKey} not found`,
+        StatusCodes.NOT_FOUND
+      );
     }
+    return airplane;
   }
-  //Select * from table
+
   async getAll() {
-    try {
-      const response = await this.model.findAll();
-      return response;
-    } catch (error) {
-      Logger.error(error);
-      throw error;
-    }
+    return await this.model.findAll();
   }
-  //UPDATE table SET column1 = data.column1, column2 = data.column2, column3 = data.column3 WHERE id = data.id
+
   async update(id, data) {
-    try {
-      const response = await this.model.update(data, {
-        where: {
-          id: id,
-        },
-      });
-      return response;
-    } catch (error) {
-      Logger.error(error);
-      throw error;
+    if (!id) {
+      throw new AppError('Id is required', StatusCodes.BAD_REQUEST);
     }
+    const airplane = await this.model.update(data, {
+      where: {
+        id: id,
+      },
+    });
+    if (!airplane) {
+      throw new AppError('Airplane not found', StatusCodes.NOT_FOUND);
+    }
+    return airplane;
   }
 }
+
 module.exports = CrudRepository;
