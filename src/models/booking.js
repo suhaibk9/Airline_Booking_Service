@@ -57,4 +57,13 @@ module.exports = (sequelize, DataTypes) => {
  totalSeats in flight service flight table refers to total seats left in a flight
   noOfSeats in booking service booking table refers to no of seats booked by user in a booking
   capacity in flight service airplane table refers to total capacity of the airplane
+
+  sameple booking body-
+  {
+  "flightId": 1,
+  "userId": 1,
+  "totalCost": 1000,
+  "noOfSeats": 1
+  
+  }
 */
