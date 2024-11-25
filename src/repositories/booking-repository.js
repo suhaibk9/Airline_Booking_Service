@@ -1,6 +1,8 @@
 const { Booking } = require('../models');
 const CrudRepository = require('./crud-repository');
 const AppError = require('../utils/errors/app-error');
+const { BOOKING_STATUS } = require('../utils/common/enums');
+const { CANCELLED, CONFIRMED } = BOOKING_STATUS;
 class BookingRepository extends CrudRepository {
   constructor() {
     super(Booking);
@@ -25,6 +27,20 @@ class BookingRepository extends CrudRepository {
         },
       },
       { transaction: transaction }
+    );
+    return response;
+  }
+  async cancelExpiredBookings(timeStamp) {
+    const response = await Booking.update(
+      { status: CANCELLED },
+      {
+        where: {
+          [Op.and]: [
+            { createdAt: { [Op.lt]: timeStamp } },
+            { status: { [Op.ne]: CONFIRMED } },
+          ],
+        },
+      }
     );
     return response;
   }

@@ -1,11 +1,15 @@
 'use strict';
 const { Model } = require('sequelize');
-const { ENUMS } = require('../utils/common/index');
+// const { ENUMS } = require('../utils/common/index');
+// console.log('ENUMS', ENUMS);
 // PENDING: 'pending',
 // CONFIRMED: 'confirmed',
 // CANCELLED: 'cancelled',
 // INITIATED: 'initiated',
-const { BOOKING_STATUS } = ENUMS;
+// const { BOOKING_STATUS } = ENUMS;
+const { BOOKING_STATUS } = require('../utils/common/enums');
+
+// const BOOKING_STATUS = ENUMS.BOOKING_STATUS;
 const { PENDING, CONFIRMED, CANCELLED, INITIATED } = BOOKING_STATUS;
 module.exports = (sequelize, DataTypes) => {
   class Booking extends Model {

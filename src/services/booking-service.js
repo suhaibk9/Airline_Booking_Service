@@ -1,14 +1,15 @@
 const { BookingRepository } = require('../repositories/index');
 const bookingRepo = new BookingRepository();
 // const FLIGHT_SERVICE_URL='http://localhost:3000';
-const { ServerConfig } = require('../config/index');
+const { ServerConfig, QueueConfig } = require('../config/index');
 const { FLIGHT_SERVICE_URL } = ServerConfig;
 const { sequelize } = require('../models');
 const axios = require('axios');
 const AppError = require('../utils/errors/app-error');
 const { ENUMS } = require('../utils/common/index');
 const db = require('../models');
-const { BOOKING_STATUS } = ENUMS;
+const { BOOKING_STATUS } = require('../utils/common/enums');
+const { text } = require('express');
 const createBooking = async (data) => {
   console.log('I reached Service');
   console.log('Data', data);
@@ -39,6 +40,7 @@ const createBooking = async (data) => {
       { seats: data.noOfSeats }
     );
     await transaction.commit();
+
     return booking;
   } catch (err) {
     console.log(err);
@@ -80,6 +82,16 @@ async function makePayment(data) {
       { status: BOOKING_STATUS.CONFIRMED },
       transaction
     );
+    // const currentUser = await axios.get(
+    //   `${FLIGHT_SERVICE_URL}/api/v1/users/${data.userId}`
+    // );
+    // console.log('LoggedIn USer', currentUser);
+
+    await QueueConfig.publishToQueue({
+      subject: `Booking Confirmed for Flight `,
+      text: `Your booking for flight confirmed. Your booking id is ${book.bookingId}`,
+      recipientEmail: `suhaib.text@gmail.com`,
+    });
     await transaction.commit();
     return book;
   } catch (err) {
@@ -105,11 +117,23 @@ async function cancelBooking(bookingId) {
     );
   } catch (err) {
     await transaction.rollback();
-    throw new AppError('Cancellation Failed', 400); 
+    throw new AppError('Cancellation Failed', 400);
+  }
+}
+async function cancelExpiredBookings() {
+  console.log('Cancel Expired Bookings');
+  try {
+    //5mins ago
+    const currentTime = new Date(Date.now() - 1000 * 300);
+    const response = await bookingRepo.cancelExpiredBookings(currentTime);
+    return response;
+  } catch (err) {
+    throw new AppError('Cancellation Failed', 400);
   }
 }
 module.exports = {
   createBooking,
   makePayment,
   cancelBooking,
+  cancelExpiredBookings,
 };
